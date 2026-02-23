@@ -152,7 +152,9 @@ vim.api.nvim_create_autocmd('TermClose', {
         vim.cmd.stopinsert()
         vim.keymap.set('n', 'q', function()
             local buf = vim.api.nvim_get_current_buf()
-            go_to_term(1)
+            if vim.api.nvim_win_get_config(0).relative == "" then
+                go_to_term(1)
+            end
             vim.api.nvim_buf_delete(buf, {})
         end, { buffer = 0 })
         vim.api.nvim_create_autocmd('TermEnter', {
