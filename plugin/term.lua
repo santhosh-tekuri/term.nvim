@@ -41,6 +41,7 @@ vim.api.nvim_create_user_command('ToggleTerm', function()
         for _, buf in ipairs(bufs) do
             if vim.bo[buf.bufnr] ~= 'terminal' then
                 vim.api.nvim_win_set_buf(0, buf.bufnr)
+                break
             end
         end
     else
