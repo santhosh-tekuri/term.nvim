@@ -1,4 +1,5 @@
 vim.cmd("autocmd! nvim.terminal TermClose *")
+
 local function terminals()
     return vim.tbl_filter(function(buf)
         return vim.bo[buf].buftype == "terminal" and vim.fn.bufloaded(buf) == 1
@@ -149,6 +150,22 @@ vim.api.nvim_create_autocmd('TermClose', {
         if not vim.api.nvim_buf_is_valid(ctx.buf) then
             return
         end
+
+        -- show [Process Exited] virtual line
+        local line = vim.api.nvim_buf_line_count(ctx.buf)
+        -- find last non-empty line
+        while line > 0 do
+            if vim.api.nvim_buf_get_lines(ctx.buf, line - 1, line, false)[1] ~= "" then
+                break
+            end
+            line = line - 1
+        end
+        local ns_id = vim.api.nvim_create_namespace("term_namespace")
+        vim.api.nvim_buf_set_extmark(ctx.buf, ns_id, line - 1, 0, {
+            virt_lines = { { { "[ Process Exited " .. vim.v.event.status .. " ]", "Normal" } } },
+            virt_lines_above = false,
+        })
+
         vim.cmd.stopinsert()
         vim.keymap.set('n', 'q', function()
             local buf = vim.api.nvim_get_current_buf()
