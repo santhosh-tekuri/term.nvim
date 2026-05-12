@@ -161,8 +161,9 @@ vim.api.nvim_create_autocmd('TermClose', {
             line = line - 1
         end
         local ns_id = vim.api.nvim_create_namespace("term_namespace")
+        local hl = vim.v.event.status == 0 and "Added" or "Removed"
         vim.api.nvim_buf_set_extmark(ctx.buf, ns_id, line - 1, 0, {
-            virt_lines = { { { "[ Process Exited " .. vim.v.event.status .. " ]", "Normal" } } },
+            virt_lines = { { { "[Process Exited " .. vim.v.event.status .. "]", hl } } },
             virt_lines_above = false,
         })
 
