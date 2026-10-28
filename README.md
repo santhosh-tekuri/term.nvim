@@ -12,7 +12,7 @@ https://github.com/santhosh-tekuri/term.nvim
 `ToogleTerm`: suggested keymap `ctrl+/`  
 `PickTerm`: opens terminal picker. suggested keymap `ctrl+shift+/`  
 `SafeQuit`: quit only if no terminal is open. if nvim is remoteUI, it detaches instead of quit, suggested keymap `<leader>q`  
-`RunCmd`: create terminal buffer with given command. add bang to omit `[Process exited]`  
+`RunCmd`: open fullscreen terminal buffer with given command. add bang to omit `[Process Exited]`  
 
 ## in terminal window:
 `ctrl+]` switch to normal mode  

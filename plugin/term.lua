@@ -1,5 +1,3 @@
-vim.cmd("autocmd! nvim.terminal TermClose *")
-
 local function terminals()
     return vim.tbl_filter(function(buf)
         return vim.bo[buf].buftype == "terminal" and vim.fn.bufloaded(buf) == 1
@@ -7,7 +5,7 @@ local function terminals()
 end
 
 local function new_terminal(name)
-    vim.cmd.terminal(vim.o.shell)
+    vim.cmd.terminal()
     vim.cmd("file term://" .. name)
     vim.api.nvim_set_option_value("buflisted", false, { buf = 0 })
     vim.api.nvim_set_option_value("modified", true, { buf = 0 })
@@ -144,6 +142,7 @@ vim.api.nvim_create_autocmd('BufEnter', {
     end
 })
 
+vim.cmd("autocmd! nvim.terminal TermClose *")
 vim.api.nvim_create_autocmd('TermClose', {
     desc = "explicity close terminal",
     callback = function(ctx)
@@ -151,18 +150,24 @@ vim.api.nvim_create_autocmd('TermClose', {
             return
         end
 
-        -- show [Process Exited] virtual line
-        local line = vim.api.nvim_buf_line_count(ctx.buf)
-        -- find last non-empty line
-        while line > 0 do
-            if vim.api.nvim_buf_get_lines(ctx.buf, line - 1, line, false)[1] ~= "" then
-                break
+        -- automatically close if started with no arguments and exiting without an error
+        if vim.v.event.status == 0 then
+            local info = vim.api.nvim_get_chan_info(vim.bo[ctx.buf].channel)
+            local argv = table.concat(info.argv or {}, ' ')
+            if argv == "" or argv == vim.o.shell then
+                local buf = vim.api.nvim_get_current_buf()
+                if vim.api.nvim_win_get_config(0).relative == "" then
+                    go_to_term(1)
+                end
+                vim.api.nvim_buf_delete(buf, {})
+                return
             end
-            line = line - 1
         end
+
+        -- show [Process Exited] virtual line
         local ns_id = vim.api.nvim_create_namespace("term_namespace")
         local hl = vim.v.event.status == 0 and "Added" or "Removed"
-        vim.api.nvim_buf_set_extmark(ctx.buf, ns_id, line - 1, 0, {
+        vim.api.nvim_buf_set_extmark(ctx.buf, ns_id, ctx.data.pos - 2, 0, {
             virt_lines = { { { "[Process Exited " .. vim.v.event.status .. "]", hl } } },
             virt_lines_above = false,
         })
