@@ -165,10 +165,19 @@ vim.api.nvim_create_autocmd('TermClose', {
         end
 
         -- show [Process Exited] virtual line
+        local line = vim.api.nvim_buf_line_count(ctx.buf)
+        while line > 0 do
+            if vim.api.nvim_buf_get_lines(ctx.buf, line - 1, line, false)[1] ~= "" then
+                break
+            end
+            line = line - 1
+        end
         local ns_id = vim.api.nvim_create_namespace("term_namespace")
         local hl = vim.v.event.status == 0 and "Added" or "Removed"
-        vim.api.nvim_buf_set_extmark(ctx.buf, ns_id, ctx.data.pos - 2, 0, {
-            virt_lines = { { { "[Process Exited " .. vim.v.event.status .. "]", hl } } },
+        local msg = vim.bo[ctx.buf].channel == 0 and '[Terminal closed]'
+            or ('[Process exited %d]'):format(vim.v.event.status)
+        vim.api.nvim_buf_set_extmark(ctx.buf, ns_id, line - 1, 0, {
+            virt_lines = { { { msg, hl } } },
             virt_lines_above = false,
         })
 
